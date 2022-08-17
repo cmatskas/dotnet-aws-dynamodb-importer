@@ -48,8 +48,8 @@
         "geolocation": {
             "type": "Point",
             "coordinates": [
-                -113,
-                54.21667
+                0,
+                0
             ]
         }
     },
@@ -66,8 +66,8 @@
         "geolocation": {
             "type": "Point",
             "coordinates": [
-                -99.9,
-                16.88333
+                0,
+                0
             ]
         }
     },
@@ -681,7 +681,7 @@
             "type": "Point",
             "coordinates": [
                 0,
-                0
+                1
             ]
         }
     },
@@ -10856,7 +10856,7 @@
             "type": "Point",
             "coordinates": [
                 0,
-                0
+                2
             ]
         }
     },

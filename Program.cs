@@ -11,7 +11,10 @@ var client = new AmazonDynamoDBClient(
 
 try
 {
-    var context = new DynamoDBContext(client);
+    var context = new DynamoDBContext(
+        client, new DynamoDBContextConfig { 
+            Conversion = DynamoDBEntryConversion.V2 
+    });
     await BatchWrite(context);
 }
 catch (AmazonServiceException e) { Console.WriteLine(e.Message); }
@@ -22,12 +25,12 @@ Console.ReadLine();
 
 static async Task BatchWrite(DynamoDBContext context)
 {
-    
     var meteoriteBatch = context.CreateBatchWrite<Meteorite>();
     var meteorites = GetData();
+    Console.WriteLine("Serialization complete");
     meteoriteBatch.AddPutItems(meteorites);
 
-    Console.WriteLine("Performing batch write in SingleTableBatchWrite().");
+    Console.WriteLine("Performing batch write...this will take a while");
     await meteoriteBatch.ExecuteAsync();
     Console.WriteLine("Batch write executed successfully");
 }
@@ -39,36 +42,14 @@ static AWSCredentials GetCredentials(string profileName)
     return awsCredentials;  
 }
 
-static HashSet<Meteorite> GetData()
+static List<Meteorite> GetData()
 {
+    Console.WriteLine("Serializing data from file");
     var fileName = "Meteorites.json";
     var jsonString = File.ReadAllText(fileName);
     var options = new JsonSerializerOptions
     {
         PropertyNameCaseInsensitive = true
     };
-    var meteorites = System.Text.Json.JsonSerializer.Deserialize<List<Meteorite>>(jsonString, options);
-
-    // checking for duplication in the collection -> there shouldn't be any
-    IEnumerable<string> duplicates = meteorites.GroupBy(x => x.Id)
-                                        .Where(g => g.Count() > 1)
-                                        .Select(x => x.Key);
-
-    if (duplicates.Any())
-    {
-        Console.WriteLine("duplicates found");
-    }
-
-    // second chedk for duplication -> doubly sure there are no duplicate items
-    var uniqueList = new HashSet<Meteorite>();
-    foreach(Meteorite m in meteorites)
-    {
-        var result = uniqueList.Add(m);
-        if (result == false)
-        {
-            throw new Exception("duplicate item found");
-        }
-    }
-    return uniqueList;
-
+    return JsonSerializer.Deserialize<List<Meteorite>>(jsonString, options);
 }
